@@ -6,7 +6,7 @@ Unofficial golang client for ChatGPT. Reverse Engineered from [chat.openai.com](
 
 1. Install the package.
 ```bash
-go get github.com/abhayptp/go-chatgpt.git
+go get github.com/abhayptp/go-chatgpt
 ```
 
 2. Get bearer token from the browser.
