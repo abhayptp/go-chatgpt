@@ -33,23 +33,18 @@ func (c *chatGpt) SendMessage(m string) (string, error) {
 		c.lastMessageId,
 		"text-davinci-002-render",
 	)
-	resChan, err := c.client.Send(req)
+	resp, err := c.client.Send(req)
 	if err != nil {
 		return "", err
 	}
 
-	var lastResp response
-	for res := range resChan {
-		lastResp = *res
-	}
-
-	if lastResp.Error != nil {
+	if resp.Error != nil {
 		return "", nil
 	}
 
 	if c.conversationId == "" {
-		c.conversationId = lastResp.ConversationID
+		c.conversationId = resp.ConversationID
 	}
 
-	return lastResp.Message.Content.Parts[0], nil
+	return resp.Message.Content.Parts[0], nil
 }
