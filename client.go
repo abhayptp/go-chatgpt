@@ -3,7 +3,9 @@ package chatgpt
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/tmaxmax/go-sse"
 	"net/http"
 	"time"
 )
@@ -39,41 +41,39 @@ func (c *client) Send(r *request) (res *response, err error) {
 	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("couldn't send request, error: %v", err)
+	var lastItem []byte
+	var validator sse.ResponseValidator = func(r *http.Response) error {
+		if r.StatusCode != http.StatusOK {
+			return fmt.Errorf("%d", r.StatusCode)
+		}
+		return nil
 	}
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("non 200 response, status code: %v", resp.StatusCode)
+
+	client := sse.Client{
+		HTTPClient:              http.DefaultClient,
+		DefaultReconnectionTime: 5 * time.Second,
+		ResponseValidator:       validator,
 	}
-	defer resp.Body.Close()
+	conn := client.NewConnection(req)
+	conn.SubscribeMessages(func(event sse.Event) {
+		if event.String() != "[DONE]" {
+			lastItem = event.Data
+		}
+	})
 
-	buf := make([]byte, 102400)
-	fmt.Println(resp.StatusCode)
-
-	// TODO: Remove aritifical timeout. Keep listening to events until "DONE" event is received.
-	time.Sleep(5 * time.Second)
-
-	_, err = resp.Body.Read(buf)
+	err = conn.Connect()
 	if err != nil {
 		return nil, err
 	}
 
-	lines := bytes.Split(buf, []byte("\n"))
-	for _, line := range lines[:len(lines)-4] {
-		if len(line) < 6 {
-			continue
-		}
-		line = line[6:]
+	if len(lastItem) > 0 {
 		var respStruct response
-		err = json.Unmarshal(line, &respStruct)
+		err = json.Unmarshal(lastItem, &respStruct)
 		if err != nil {
-			return res, fmt.Errorf("couldn't unmarshal response, error: %v", err)
+			return nil, err
+		} else {
+			return &respStruct, nil
 		}
-		res = &respStruct
-		fmt.Println(res)
 	}
-
-	return res, nil
+	return nil, errors.New("result is empty")
 }
