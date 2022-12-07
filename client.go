@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/tmaxmax/go-sse"
 	"net/http"
 	"time"
+
+	"github.com/tmaxmax/go-sse"
 )
 
 type Client interface {
@@ -40,6 +41,7 @@ func (c *client) Send(r *request) (res *response, err error) {
 	req.Header.Set("Accept", "text/event-stream")
 	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36")
 
 	var lastItem []byte
 	var validator sse.ResponseValidator = func(r *http.Response) error {
