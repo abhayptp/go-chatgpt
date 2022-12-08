@@ -40,3 +40,8 @@ func main() {
 	fmt.Println(res)
 }
 ```
+
+add proxy support
+```
+PROXY=socks5://1.2.3.4:1234 go run main.go
+```
