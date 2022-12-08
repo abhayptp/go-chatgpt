@@ -6,9 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
+	"os"
 	"time"
 
 	"github.com/tmaxmax/go-sse"
+	"golang.org/x/net/proxy"
 )
 
 type Client interface {
@@ -55,6 +58,23 @@ func (c *client) Send(r *request) (res *response, err error) {
 		HTTPClient:              http.DefaultClient,
 		DefaultReconnectionTime: 5 * time.Second,
 		ResponseValidator:       validator,
+	}
+	proxyHost := os.Getenv("PROXY")
+	if proxyHost != "" {
+		u, err := url.Parse(proxyHost)
+		if err != nil {
+			return nil, err
+		}
+		dialer, err := proxy.FromURL(u, proxy.Direct)
+		if err != nil {
+			return nil, err
+		}
+		client.HTTPClient = &http.Client{
+			Transport: &http.Transport{
+				Proxy:       http.ProxyFromEnvironment,
+				DialContext: dialer,
+			},
+		}
 	}
 	conn := client.NewConnection(req)
 	conn.SubscribeMessages(func(event sse.Event) {
