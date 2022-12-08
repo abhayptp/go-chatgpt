@@ -2,9 +2,11 @@ package chatgpt
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -71,8 +73,10 @@ func (c *client) Send(r *request) (res *response, err error) {
 		}
 		client.HTTPClient = &http.Client{
 			Transport: &http.Transport{
-				Proxy:       http.ProxyFromEnvironment,
-				DialContext: dialer,
+				Proxy: http.ProxyFromEnvironment,
+				DialContext: func(ctx context.Context, network, address string) (net.Conn, error) {
+					return dialer.Dial(network, address)
+				},
 			},
 		}
 	}
