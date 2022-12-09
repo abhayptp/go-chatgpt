@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// TestSend tests the send method of the client
+// TestSendMessage tests the send method of the client
 func TestSendMessage(t *testing.T) {
 	// Prepare test data
 	credentials := &credentials{BearerToken: "Bearer <Bearer-Token>"}
