@@ -11,6 +11,9 @@ go get github.com/abhayptp/go-chatgpt
 
 2. Get bearer token from the browser.
 
+To avoid needing to refresh bearer token every hour, you can also copy "__Secure-next-auth.session-token" key from cookie and pass it in Credentials in Step 3. 
+
+
 <img src="https://user-images.githubusercontent.com/22256898/205469104-d99b6a6a-18d2-4fea-9a58-6936d3be6479.png" width=80%>
 
 
@@ -27,8 +30,11 @@ import (
 
 func main() {
 
-	// Initialize. Copy bearer-token from browser developer tools.
-	c := chatgpt.NewChatGpt(chatgpt.NewClient(chatgpt.NewCredentials("Bearer <Bearer-Token>")))
+	// Initialize. Copy bearer-token and session-token from browser developer tools.
+	c := chatgpt.NewChatGpt(chatgpt.NewClient(&chatgpt.Credentials{
+		BearerToken: "Bearer <bearer-token>",
+		SessionToken: "<session-token>",
+		}))
 
 	// Send message
 	res, err := c.SendMessage("hello")

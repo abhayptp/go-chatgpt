@@ -1,11 +1,15 @@
 package chatgpt
 
-type credentials struct {
-	BearerToken string
+import "time"
+
+type Credentials struct {
+	BearerToken     string
+	SessionToken    string
+	tokenExpiryTime time.Time
 }
 
-func NewCredentials(bearerToken string) *credentials {
-	return &credentials{
+func NewCredentials(bearerToken string) *Credentials {
+	return &Credentials{
 		BearerToken: bearerToken,
 	}
 }
