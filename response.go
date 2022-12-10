@@ -1,5 +1,11 @@
 package chatgpt
 
+type sessionResponse struct {
+	Error       string `json:"error"`
+	Expires     string `json:"expires"`
+	AccessToken string `json:"accessToken"`
+}
+
 type responseMessage struct {
 	ID         string      `json:"id"`
 	Role       string      `json:"role"`
